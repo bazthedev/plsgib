@@ -12,6 +12,7 @@ A macro for pls donate on Roblox, allowing you to afk whilst still being able to
 - Updating the booth text to display the goal progress
 
 # TBA:
+- Replying to chat messages and conversing with people (maybe)
 - More realistic celebrations (e.g. jumps, spinning, multiple chat msgs etc)
 - Not sure what else you guys want so be sure to let me know
 
