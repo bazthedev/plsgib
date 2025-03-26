@@ -1,0 +1,7 @@
+discord==1.7.3
+psutil
+requests
+pynput
+mousekey
+screeninfo
+win10toast
