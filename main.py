@@ -19,11 +19,12 @@ import pynput
 import mousekey
 import screeninfo as si
 from win10toast import ToastNotifier
+import webbrowser
 
 MACROPATH = os.path.expandvars(r"%localappdata%\plsgib") # Windows Roaming Path
-LOCALVERSION = "1.0.0"
-DEFAULTSETTINGS = {"WEBHOOK_URL" : "", "__version__" : LOCALVERSION, "say_random_stuff" : True, "stuff_to_say" : ["pls gib", "goal progress: {goal_progress}"], "thank_you_messages" : ["tysm {donor}", "ty!", "ty", "thanks!"], "do_emotes" : True, "emotes" : ["dance1", "dance2", "dance3", "wave"], "goal" : 0, "goal_progress" : 0, "booth_msg" : "goal: {goal_progress}", "goal_reached_msg" : "goal reached tysm!", "1_rbx_1_jump" : False, "failsafe_key" : "ctrl+e"}
-VALIDSETTINGSKEYS = ["WEBHOOK_URL", "__version__", "say_random_stuff", "stuff_to_say", "thank_you_messages", "do_emotes", "emotes", "goal", "goal_progress", "booth_msg", "goal_reached_msg", "1_rbx_1_jump", "failsafe_key"]
+LOCALVERSION = "1.0.1"
+DEFAULTSETTINGS = {"WEBHOOK_URL" : "", "__version__" : LOCALVERSION, "say_random_stuff" : True, "stuff_to_say" : ["pls gib", "goal progress: {goal_progress}"], "thank_you_messages" : ["tysm {donor}", "ty!", "ty", "thanks!"], "do_emotes" : True, "emotes" : ["dance1", "dance2", "dance3", "wave"], "goal" : 0, "goal_progress" : 0, "booth_msg" : "goal: {goal_progress}", "goal_reached_msg" : "goal reached tysm!", "1_rbx_1_jump" : False, "failsafe_key" : "ctrl+e", "viewed_warning" : False}
+VALIDSETTINGSKEYS = ["WEBHOOK_URL", "__version__", "say_random_stuff", "stuff_to_say", "thank_you_messages", "do_emotes", "emotes", "goal", "goal_progress", "booth_msg", "goal_reached_msg", "1_rbx_1_jump", "failsafe_key", "viewed_warning"]
 
 RBLXPLAYER_LOGSDIR = os.path.expandvars(r"%localappdata%\Roblox\logs") # This is for the Roblox Player
 MSRBLX_LOGSDIR = os.path.expandvars(r"%LOCALAPPDATA%\Packages\ROBLOXCorporation.ROBLOX_55nm5eh3cm0pr\LocalState\logs") # This is for the Microsoft Store version of Roblox
@@ -203,7 +204,6 @@ def get_user_info_from_logs(logs_dir):
         print(f"An error occurred: {e}")
         return None
     
-
 if not os.path.exists(f"{MACROPATH}"):
     os.mkdir(MACROPATH)
 
@@ -218,7 +218,29 @@ if not os.path.isfile(f"{MACROPATH}/icon.ico"):
     f.close()
 
 reload_settings()
+new_ver = requests.get(f"https://api.github.com/repos/bazthedev/plsgib/releases/latest")
+new_ver_str = new_ver.json()["name"]
+
+if settings["__version__"] < LOCALVERSION:
+    settings["__version__"] = LOCALVERSION
+    update_settings(settings)
+    reload_settings()
+    print(f"The macro has been updated to version {LOCALVERSION}!")
+
+if LOCALVERSION < new_ver_str:
+    confirm_dl = messagebox.askyesno(MACROTITLE, f"A new version has been found ({new_ver_str}), would you like to visit the GitHub page to download it? ")
+    if confirm_dl:
+        webbrowser.open("https://github.com/bazthedev/plsgib/releases/latest")
+
 validate_settings()
+if not settings["viewed_warning"]:
+    ask_proceed = messagebox.askyesno(f"{MACROTITLE} - WARNING", "WARNING!\nTHIS MACRO IS ARGUABLY BOTTING, WHICH CAN POTENTIALLY GET YOU BANNED FROM PLS DONATE!\nARE YOU SURE YOU WISH TO PROCEED?")
+    if ask_proceed:
+        settings["viewed_warning"] = True
+        update_settings(settings)
+        reload_settings()
+    else:
+        sys.exit()
 try:
     mkey.enable_failsafekill(settings["failsafe_key"])
 except Exception as e:
@@ -297,6 +319,8 @@ class SettingsApp:
         label = ttk.Label(row, text=f"{MACROTITLE} v{LOCALVERSION}", width=25, anchor="w")
         label.pack(side=tk.LEFT)
         for key, value in settings.items():
+            if key == "viewed_warning" or  key == "__version__":
+                continue
             row = ttk.Frame(parent)
             row.pack(fill=tk.X, pady=5)
 
