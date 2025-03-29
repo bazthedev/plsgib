@@ -4,4 +4,3 @@ requests
 pynput
 mousekey
 screeninfo
-win10toast
